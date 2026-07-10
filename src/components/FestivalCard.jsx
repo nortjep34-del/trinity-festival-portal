@@ -2,18 +2,27 @@ export default function FestivalCard({ festival, onClick }) {
   return (
     <button
       onClick={() => onClick(festival)}
-      className="flex min-h-[215px] flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 text-left shadow-xl transition hover:-translate-y-1 hover:shadow-2xl"
+      className="group relative flex min-h-[270px] flex-col justify-between overflow-hidden rounded-[36px] bg-cover bg-center p-6 text-left shadow-xl shadow-slate-300/60 transition duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-slate-400/70"
+      style={{
+        backgroundImage: `linear-gradient(rgba(7,27,58,.35), rgba(7,27,58,.55)), url(${festival.image})`,
+      }}
     >
-      <div>
-        <div className="mb-4 text-5xl">{festival.icon}</div>
+      <div className="relative z-10">
+        <p className="mb-3 text-sm font-black uppercase tracking-[0.24em] text-white drop-shadow">
+          {festival.age}
+        </p>
 
-        <h2 className="text-2xl font-extrabold leading-tight text-[#071b3a]">
-          {festival.title}
+        <h2 className="text-3xl font-black leading-tight text-white drop-shadow-lg">
+          {festival.sport}
         </h2>
+
+        <p className="mt-1 text-xl font-extrabold uppercase tracking-wide text-white drop-shadow">
+          {festival.type}
+        </p>
       </div>
 
-      <div className="mt-5 w-fit rounded-xl bg-[#071b3a] px-5 py-3 text-sm font-extrabold uppercase tracking-wide text-white">
-        Enter Festival
+      <div className="relative z-10 mt-6 inline-flex w-fit items-center rounded-full bg-white px-5 py-3 text-sm font-black uppercase tracking-wide text-[#071b3a] shadow-lg">
+        {festival.dateRange}
       </div>
     </button>
   );

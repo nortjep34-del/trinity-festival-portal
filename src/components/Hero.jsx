@@ -1,33 +1,47 @@
 import { settings } from "../data/settings";
+import trinityLogo from "../assets/trinity-logo.png";
 
 export default function Hero() {
   return (
     <section
-      className="flex min-h-[58vh] items-center justify-center bg-cover bg-center px-5 py-10 text-center text-white"
+      className="relative flex min-h-[62vh] items-center justify-center overflow-hidden bg-cover bg-center px-5 py-16 text-center"
       style={{
-        backgroundImage: `linear-gradient(rgba(5,24,54,.72), rgba(5,24,54,.72)), url(${settings.heroImage})`,
+        backgroundImage: `url(${settings.heroImage})`,
       }}
     >
-      <div className="w-full max-w-5xl">
+      <div className="relative z-10 w-full max-w-5xl">
         <div
-          className="mx-auto w-fit rounded-[40px] px-10 py-7 shadow-2xl"
+          className="relative mx-auto overflow-hidden rounded-[55px] border-4 px-8 py-14 shadow-2xl md:px-16"
           style={{
             background: settings.colours.gold,
             color: settings.colours.navy,
+            borderColor: settings.colours.navy,
           }}
         >
-          <h2 className="text-5xl font-black uppercase leading-tight tracking-wider">
-            {settings.schoolName}
-          </h2>
+          <img
+            src={trinityLogo}
+            alt="Trinityhouse Logo"
+            className="absolute inset-0 m-auto h-[360px] w-auto object-contain opacity-[0.50]"
+          />
 
-          <h1 className="mt-2 text-5xl font-black uppercase leading-tight tracking-wider">
-            {settings.portalName}
-          </h1>
+          <div className="relative z-10 text-3xl font-black uppercase tracking-widest md:text-5xl">
+            Trinityhouse
+          </div>
+
+          <div className="relative z-10 text-3xl font-black uppercase tracking-widest md:text-5xl">
+            Randpark Ridge
+          </div>
+
+          <div className="relative z-10 my-5 flex items-center gap-4">
+            <div className="h-1 flex-1 bg-[#071b3a]" />
+            <div className="h-3 w-3 rotate-45 bg-[#071b3a]" />
+            <div className="h-1 flex-1 bg-[#071b3a]" />
+          </div>
+
+          <div className="relative z-10 text-3xl font-black uppercase tracking-widest md:text-4xl">
+            Festival Portal
+          </div>
         </div>
-
-        <p className="mx-auto mt-8 max-w-3xl text-xl font-medium">
-          {settings.tagline}
-        </p>
       </div>
     </section>
   );

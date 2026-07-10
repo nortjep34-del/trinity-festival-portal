@@ -1,58 +1,303 @@
-import { useState } from "react";
-import { festivals } from "./data/festivals";
+import { useMemo, useState } from "react";
+
 import FestivalCard from "./components/FestivalCard";
 import Hero from "./components/Hero";
+import FestivalHeader from "./components/FestivalHeader";
+import FestivalTabs from "./components/FestivalTabs";
+import WelcomeTab from "./components/WelcomeTab";
+import FixturesTab from "./components/FixturesTab";
+import ResultsTab from "./components/ResultsTab";
+import TeamsTab from "./components/TeamsTab";
+import MapsTab from "./components/MapsTab";
+
+import {
+  FestivalDataProvider,
+  useFestivalData,
+} from "./context/FestivalDataContext";
+
+const festivalTabs = [
+  "Welcome",
+  "Fixtures",
+  "Results",
+  "Schools",
+  "Map",
+  "Programme",
+  "Vendors",
+  "Health & Safety",
+];
 
 export default function App() {
-  const [selectedFestival, setSelectedFestival] = useState(null);
+  return (
+    <FestivalDataProvider>
+      <FestivalPortal />
+    </FestivalDataProvider>
+  );
+}
 
-  if (selectedFestival) {
+function FestivalPortal() {
+  const {
+    festivals,
+    masterLoading,
+    masterError,
+
+    selectedFestival,
+    openFestival,
+    closeFestival,
+
+    festivalLoading,
+    festivalError,
+    festivalData,
+  } = useFestivalData();
+
+  const [activeTab, setActiveTab] =
+    useState("Welcome");
+
+  const [selectedDay, setSelectedDay] =
+    useState("All Dates");
+
+  const [selectedCategory, setSelectedCategory] =
+    useState("All Teams");
+
+  const [searchTerm, setSearchTerm] =
+    useState("");
+
+  const availableDays = useMemo(() => {
+    return [
+      ...new Set(
+        festivalData.fixtures
+          .map((fixture) => fixture.day)
+          .filter(Boolean)
+      ),
+    ];
+  }, [festivalData.fixtures]);
+
+  const filteredFixtures = useMemo(() => {
+    return festivalData.fixtures.filter(
+      (fixture) => {
+        const matchesDay =
+          selectedDay === "All Dates" ||
+          fixture.day === selectedDay;
+
+        const matchesCategory =
+          selectedCategory === "All Teams" ||
+          fixture.category === selectedCategory;
+
+        const searchableText = [
+          fixture.teamA,
+          fixture.teamB,
+          fixture.venue,
+        ]
+          .join(" ")
+          .toLowerCase();
+
+        const matchesSearch =
+          searchableText.includes(
+            searchTerm.toLowerCase()
+          );
+
+        return (
+          matchesDay &&
+          matchesCategory &&
+          matchesSearch
+        );
+      }
+    );
+  }, [
+    festivalData.fixtures,
+    selectedDay,
+    selectedCategory,
+    searchTerm,
+  ]);
+
+  async function handleFestivalOpen(festival) {
+    if (!festival.active) return;
+
+    setActiveTab("Welcome");
+    setSelectedDay("All Dates");
+    setSelectedCategory("All Teams");
+    setSearchTerm("");
+
+    await openFestival(festival);
+  }
+
+  function handleBackHome() {
+    closeFestival();
+
+    setActiveTab("Welcome");
+    setSelectedDay("All Dates");
+    setSelectedCategory("All Teams");
+    setSearchTerm("");
+  }
+
+  if (!selectedFestival) {
     return (
-      <div className="min-h-screen bg-slate-100 font-sans">
-        <header className="bg-[#071b3a] px-5 py-6 text-white">
-          <button
-            onClick={() => setSelectedFestival(null)}
-            className="rounded-xl bg-[#e0ac18] px-4 py-2 font-extrabold text-[#071b3a]"
-          >
-            ← Back Home
-          </button>
-
-          <h1 className="mt-6 text-3xl font-black uppercase tracking-wide">
-            {selectedFestival.icon} {selectedFestival.title}
-          </h1>
-        </header>
-
-        <main className="mx-auto max-w-6xl px-5 py-8">
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {["Fixtures", "Teams", "Find My Team", "Maps", "Downloads", "Announcements"].map((item) => (
-              <div key={item} className="rounded-3xl bg-white p-6 shadow-lg">
-                <h2 className="mb-4 text-2xl font-extrabold text-[#071b3a]">{item}</h2>
-                <button className="rounded-xl bg-[#071b3a] px-4 py-3 font-extrabold text-white">
-                  Open
-                </button>
-              </div>
-            ))}
-          </div>
-        </main>
-      </div>
+      <Homepage
+        festivals={festivals}
+        loading={masterLoading}
+        error={masterError}
+        onFestivalOpen={handleFestivalOpen}
+      />
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 font-sans">
-      <Hero />
+    <div className="min-h-screen bg-[#e8dfcf] font-sans">
+      <FestivalHeader
+        selectedFestival={selectedFestival}
+        onBackHome={handleBackHome}
+      />
 
-      <main className="mx-auto -mt-12 max-w-7xl px-5 pb-14">
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {festivals.map((festival) => (
-            <FestivalCard
-              key={festival.title}
-              festival={festival}
-              onClick={setSelectedFestival}
+      <FestivalTabs
+        tabs={festivalTabs}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
+
+      <main className="mx-auto max-w-6xl px-5 py-8">
+        {festivalLoading && (
+          <StatusCard text="Loading festival information..." />
+        )}
+
+        {!festivalLoading && festivalError && (
+          <StatusCard
+            text={festivalError}
+            error
+          />
+        )}
+
+        {!festivalLoading &&
+          !festivalError &&
+          activeTab === "Welcome" && (
+            <WelcomeTab
+              selectedFestival={selectedFestival}
+              festivalContent={
+                festivalData.content
+              }
             />
-          ))}
-        </div>
+          )}
+
+        {!festivalLoading &&
+          !festivalError &&
+          activeTab === "Fixtures" && (
+            <FixturesTab
+              selectedDay={selectedDay}
+              setSelectedDay={setSelectedDay}
+              selectedCategory={selectedCategory}
+              setSelectedCategory={
+                setSelectedCategory
+              }
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              filteredFixtures={
+                filteredFixtures
+              }
+              availableDays={availableDays}
+            />
+          )}
+
+        {!festivalLoading &&
+          !festivalError &&
+          activeTab === "Results" && (
+            <ResultsTab
+              results={festivalData.results}
+            />
+          )}
+
+        {!festivalLoading &&
+          !festivalError &&
+          activeTab === "Schools" && (
+            <TeamsTab
+              teams={festivalData.schools}
+            />
+          )}
+
+        {!festivalLoading &&
+          !festivalError &&
+          activeTab === "Map" && (
+            <MapsTab maps={festivalData.maps} />
+          )}
+
+        {!festivalLoading &&
+          !festivalError &&
+          ![
+            "Welcome",
+            "Fixtures",
+            "Results",
+            "Schools",
+            "Map",
+          ].includes(activeTab) && (
+            <section className="rounded-[28px] bg-white px-8 py-10 shadow-xl">
+              <h2 className="mb-5 text-center text-3xl font-black uppercase text-[#071b3a]">
+                {activeTab}
+              </h2>
+
+              <p className="text-center text-lg text-slate-700">
+                This section is ready to use data
+                from this festival’s individual
+                Google Sheet.
+              </p>
+            </section>
+          )}
       </main>
     </div>
+  );
+}
+
+function Homepage({
+  festivals,
+  loading,
+  error,
+  onFestivalOpen,
+}) {
+  return (
+    <div className="min-h-screen bg-[#8a1738] font-sans">
+      <Hero />
+
+      <main className="mx-auto max-w-7xl px-5 pb-16 pt-12">
+        {loading && (
+          <StatusCard text="Loading festivals..." />
+        )}
+
+        {!loading && error && (
+          <StatusCard text={error} error />
+        )}
+
+        {!loading &&
+          !error &&
+          festivals.length === 0 && (
+            <StatusCard text="No festivals have been added to the Master Index yet." />
+          )}
+
+        {!loading &&
+          !error &&
+          festivals.length > 0 && (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {festivals.map((festival) => (
+                <FestivalCard
+                  key={festival.title}
+                  festival={festival}
+                  onClick={onFestivalOpen}
+                />
+              ))}
+            </div>
+          )}
+      </main>
+    </div>
+  );
+}
+
+function StatusCard({ text, error = false }) {
+  return (
+    <section className="rounded-[28px] bg-white px-8 py-10 text-center shadow-xl">
+      <p
+        className={`text-xl font-black ${
+          error
+            ? "text-[#8a1738]"
+            : "text-[#071b3a]"
+        }`}
+      >
+        {text}
+      </p>
+    </section>
   );
 }

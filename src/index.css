@@ -1,1 +1,134 @@
 @import "tailwindcss";
+
+/* General page setup */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+/*
+  MOBILE TEXT
+  Approximately 40% smaller than standard Tailwind text sizes.
+*/
+@media (max-width: 767px) {
+  .text-xs {
+    font-size: 0.45rem !important;
+    line-height: 0.65rem !important;
+  }
+
+  .text-sm {
+    font-size: 0.525rem !important;
+    line-height: 0.75rem !important;
+  }
+
+  .text-base {
+    font-size: 0.6rem !important;
+    line-height: 0.9rem !important;
+  }
+
+  .text-lg {
+    font-size: 0.675rem !important;
+    line-height: 1rem !important;
+  }
+
+  .text-xl {
+    font-size: 0.75rem !important;
+    line-height: 1.05rem !important;
+  }
+
+  .text-2xl {
+    font-size: 0.9rem !important;
+    line-height: 1.2rem !important;
+  }
+
+  .text-3xl {
+    font-size: 1.125rem !important;
+    line-height: 1.4rem !important;
+  }
+
+  .text-4xl {
+    font-size: 1.35rem !important;
+    line-height: 1.65rem !important;
+  }
+
+  .text-5xl {
+    font-size: 1.8rem !important;
+    line-height: 2.05rem !important;
+  }
+
+  .text-6xl {
+    font-size: 2.25rem !important;
+    line-height: 2.45rem !important;
+  }
+
+  .text-7xl {
+    font-size: 2.7rem !important;
+    line-height: 2.95rem !important;
+  }
+}
+
+/*
+  TABLET, LAPTOP AND DESKTOP TEXT
+  Approximately 20% smaller than standard Tailwind text sizes.
+*/
+@media (min-width: 768px) {
+  .text-xs {
+    font-size: 0.6rem !important;
+    line-height: 0.85rem !important;
+  }
+
+  .text-sm {
+    font-size: 0.7rem !important;
+    line-height: 1rem !important;
+  }
+
+  .text-base {
+    font-size: 0.8rem !important;
+    line-height: 1.2rem !important;
+  }
+
+  .text-lg {
+    font-size: 0.9rem !important;
+    line-height: 1.3rem !important;
+  }
+
+  .text-xl {
+    font-size: 1rem !important;
+    line-height: 1.4rem !important;
+  }
+
+  .text-2xl {
+    font-size: 1.2rem !important;
+    line-height: 1.6rem !important;
+  }
+
+  .text-3xl {
+    font-size: 1.5rem !important;
+    line-height: 1.85rem !important;
+  }
+
+  .text-4xl {
+    font-size: 1.8rem !important;
+    line-height: 2.15rem !important;
+  }
+
+  .text-5xl {
+    font-size: 2.4rem !important;
+    line-height: 2.7rem !important;
+  }
+
+  .text-6xl {
+    font-size: 3rem !important;
+    line-height: 3.25rem !important;
+  }
+
+  .text-7xl {
+    font-size: 3.6rem !important;
+    line-height: 3.9rem !important;
+  }
+}
