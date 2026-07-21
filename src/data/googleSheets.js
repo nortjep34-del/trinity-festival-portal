@@ -6,16 +6,26 @@ function extractGoogleJson(text) {
   const end = text.lastIndexOf("}");
 
   if (start === -1 || end === -1) {
-    throw new Error("Google Sheets returned an invalid response.");
+    throw new Error(
+      "Google Sheets returned an invalid response."
+    );
   }
 
-  return JSON.parse(text.substring(start, end + 1));
+  return JSON.parse(
+    text.substring(start, end + 1)
+  );
 }
 
-export function extractSpreadsheetId(linkOrId) {
-  if (!linkOrId) return "";
+export function extractSpreadsheetId(
+  linkOrId
+) {
+  if (!linkOrId) {
+    return "";
+  }
 
-  const value = String(linkOrId).trim();
+  const value = String(
+    linkOrId
+  ).trim();
 
   const spreadsheetMatch = value.match(
     /\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/
@@ -38,11 +48,15 @@ export async function fetchSheet({
   range = "A4:Z",
 }) {
   if (!spreadsheetId) {
-    throw new Error(`No spreadsheet ID supplied for ${sheetName}.`);
+    throw new Error(
+      `No spreadsheet ID supplied for ${sheetName}.`
+    );
   }
 
   if (!sheetName) {
-    throw new Error("No Google Sheet tab name was supplied.");
+    throw new Error(
+      "No Google Sheet tab name was supplied."
+    );
   }
 
   const params = new URLSearchParams({
@@ -64,127 +78,311 @@ export async function fetchSheet({
     );
   }
 
-  const responseText = await response.text();
-  const data = extractGoogleJson(responseText);
+  const responseText =
+    await response.text();
+
+  const data =
+    extractGoogleJson(responseText);
 
   if (data.status === "error") {
     const errorMessage =
       data.errors
-        ?.map((error) => error.detailed_message || error.message)
-        .join(" ") || `Could not load ${sheetName}.`;
+        ?.map(
+          (error) =>
+            error.detailed_message ||
+            error.message
+        )
+        .join(" ") ||
+      `Could not load ${sheetName}.`;
 
     throw new Error(errorMessage);
   }
 
-  const columns = data.table.cols.map((column, index) => {
-    const label = String(column.label || "").trim();
+  const columns = data.table.cols.map(
+    (column, index) => {
+      const label = String(
+        column.label || ""
+      ).trim();
 
-    return label || `Column ${index + 1}`;
-  });
+      return (
+        label ||
+        `Column ${index + 1}`
+      );
+    }
+  );
 
   return data.table.rows
     .map((row) => {
       const item = {};
 
-      columns.forEach((column, index) => {
-        const cell = row.c?.[index];
+      columns.forEach(
+        (column, index) => {
+          const cell =
+            row.c?.[index];
 
-        item[column] = cell?.f ?? cell?.v ?? "";
-      });
+          item[column] =
+            cell?.f ??
+            cell?.v ??
+            "";
+        }
+      );
 
       return item;
     })
     .filter((row) =>
       Object.values(row).some(
-        (value) => String(value ?? "").trim() !== ""
+        (value) =>
+          String(value ?? "").trim() !==
+          ""
       )
+    );
+}
+
+function getFirstValue(
+  row,
+  possibleNames
+) {
+  for (const name of possibleNames) {
+    const value = row?.[name];
+
+    if (
+      value !== undefined &&
+      value !== null &&
+      String(value).trim() !== ""
+    ) {
+      return value;
+    }
+  }
+
+  return "";
+}
+
+function normalizeTeamInfoRows(rows) {
+  if (!Array.isArray(rows)) {
+    return [];
+  }
+
+  return rows
+    .map((row) => {
+      const schoolName =
+        getFirstValue(row, [
+          "School Name",
+          "Team Name",
+          "School",
+          "Team",
+          "Name",
+        ]);
+
+      const infographicUrl =
+        getFirstValue(row, [
+          "Infographic URL",
+          "Infographic Link",
+          "Team Information Image",
+          "School Information Image",
+          "Team Information Page",
+          "School Information Page",
+          "Image URL",
+          "Image Link",
+          "Image",
+          "Link",
+        ]);
+
+      const category =
+        getFirstValue(row, [
+          "Category",
+          "Boys/Girls",
+          "Boys / Girls",
+          "Gender",
+        ]);
+
+      const active =
+        getFirstValue(row, [
+          "Active",
+          "Visible",
+          "Show",
+        ]);
+
+      const displayOrder =
+        getFirstValue(row, [
+          "Display Order",
+          "Order",
+        ]);
+
+      const altText =
+        getFirstValue(row, [
+          "Alt Text",
+          "Description",
+        ]);
+
+      return {
+        ...row,
+
+        "School Name":
+          schoolName,
+
+        "Team Name":
+          schoolName,
+
+        Category:
+          category,
+
+        "Team Information Image":
+          infographicUrl,
+
+        "Image Link":
+          infographicUrl,
+
+        Image:
+          infographicUrl,
+
+        "Display Order":
+          displayOrder,
+
+        "Alt Text":
+          altText,
+
+        Active:
+          active,
+      };
+    })
+    .filter(
+      (row) =>
+        String(
+          row["School Name"] || ""
+        ).trim() !== ""
     );
 }
 
 export function fetchMasterFestivals() {
   return fetchSheet({
-    spreadsheetId: MASTER_SPREADSHEET_ID,
+    spreadsheetId:
+      MASTER_SPREADSHEET_ID,
     sheetName: "Festivals",
     range: "A4:H",
   });
 }
 
-export async function fetchFestivalWorkbook(spreadsheetId) {
+export async function fetchFestivalWorkbook(
+  spreadsheetId
+) {
   const sheetRequests = {
     settings: {
       sheetName: "Settings",
       range: "A4:B",
     },
+
     festivalContent: {
       sheetName: "FestivalContent",
       range: "A4:B",
     },
+
     fixtures: {
       sheetName: "Fixtures",
       range: "A4:G",
     },
+
     results: {
       sheetName: "Results",
       range: "A4:I",
     },
+
     schools: {
       sheetName: "Schools",
       range: "A4:B",
     },
+
     teamInfo: {
       sheetName: "TeamInfo",
-      range: "A4:B",
+
+      /*
+       * Your TeamInfo information extends
+       * through column G:
+       *
+       * A/B = Display Order
+       * C = School Name
+       * D = Category
+       * E = Infographic URL
+       * F = Alt Text
+       * G = Active
+       */
+      range: "A4:G",
     },
+
     maps: {
       sheetName: "Maps",
       range: "A4:C",
     },
+
     programme: {
       sheetName: "Programme",
       range: "A4:C",
     },
+
     vendors: {
       sheetName: "Vendors",
       range: "A4:D",
     },
+
     healthSafety: {
       sheetName: "HealthSafety",
       range: "A4:C",
     },
+
     downloads: {
       sheetName: "Downloads",
       range: "A4:D",
     },
   };
 
-  const entries = Object.entries(sheetRequests);
+  const entries =
+    Object.entries(sheetRequests);
 
-  const responses = await Promise.allSettled(
-    entries.map(([, request]) =>
-      fetchSheet({
-        spreadsheetId,
-        sheetName: request.sheetName,
-        range: request.range,
-      })
-    )
+  const responses =
+    await Promise.allSettled(
+      entries.map(([, request]) =>
+        fetchSheet({
+          spreadsheetId,
+          sheetName:
+            request.sheetName,
+          range:
+            request.range,
+        })
+      )
+    );
+
+  return entries.reduce(
+    (workbook, [key], index) => {
+      const response =
+        responses[index];
+
+      if (
+        response.status ===
+        "fulfilled"
+      ) {
+        if (key === "teamInfo") {
+          workbook[key] =
+            normalizeTeamInfoRows(
+              response.value
+            );
+        } else {
+          workbook[key] =
+            response.value;
+        }
+      } else {
+        console.warn(
+          `Could not load ${key}:`,
+          response.reason
+        );
+
+        workbook[key] = [];
+      }
+
+      return workbook;
+    },
+    {}
   );
-
-  return entries.reduce((workbook, [key], index) => {
-    const response = responses[index];
-
-    if (response.status === "fulfilled") {
-      workbook[key] = response.value;
-    } else {
-      console.warn(
-        `Could not load ${key}:`,
-        response.reason
-      );
-
-      workbook[key] = [];
-    }
-
-    return workbook;
-  }, {});
 }
 
-export { MASTER_SPREADSHEET_ID };
+export {
+  MASTER_SPREADSHEET_ID,
+};

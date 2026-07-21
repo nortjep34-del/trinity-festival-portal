@@ -258,42 +258,64 @@ function mapResults(rows) {
     );
 }
 
-function mapSchools(teamInfoRows, schoolRows) {
-  const teamInfo = teamInfoRows
-    .map((row) => ({
-      teamName: getValue(row, [
+function mapSchools(teamInfoRows = [], schoolRows = []) {
+  const sourceRows =
+    Array.isArray(teamInfoRows) && teamInfoRows.length > 0
+      ? teamInfoRows
+      : Array.isArray(schoolRows)
+        ? schoolRows
+        : [];
+
+  return sourceRows
+    .map((row) => {
+      const teamName = getValue(row, [
         "School Name",
         "Team Name",
         "School",
         "Team",
-      ]),
+      ]);
 
-      image: getValue(row, [
+      const category = getValue(row, [
+        "Category",
+        "Boys/Girls",
+        "Boys / Girls",
+        "Gender",
+      ]);
+
+      const image = getValue(row, [
+        "Infographic URL",
+        "Infographic Link",
         "Team Information Image",
         "School Information Image",
         "Team Information Page",
-        "Image",
+        "School Information Page",
+        "Image URL",
         "Image Link",
-      ]),
-    }))
-    .filter((school) => school.teamName);
+        "Image",
+      ]);
 
-  if (teamInfo.length > 0) {
-    return teamInfo;
-  }
+      const activeValue = getValue(row, [
+        "Active",
+        "Visible",
+        "Show",
+      ]);
 
-  return schoolRows
-    .map((row) => ({
-      teamName: getValue(row, [
-        "School Name",
-        "Team Name",
-        "School",
-        "Team",
-      ]),
+      const isActive =
+        activeValue === "" ? true : toBoolean(activeValue);
 
-      image: "",
-    }))
-    .filter((school) => school.teamName);
+      return {
+        teamName,
+        category,
+        image,
+        active: isActive,
+      };
+    })
+    .filter(
+      (school) =>
+        school.teamName &&
+        school.image &&
+        school.active
+    );
 }
 
 function mapContentRows(rows) {
