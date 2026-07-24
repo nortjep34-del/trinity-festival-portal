@@ -347,28 +347,46 @@ function mapResults(rows) {
 
       venue: getValue(row, [
         "Venue",
+        "Field",
+        "Ground",
       ]),
 
       category: getValue(row, [
         "Boys/Girls",
+        "Boys / Girls",
+        "Category",
         "Gender",
       ]),
 
       teamA: getValue(row, [
         "Team A",
+        "Team 1",
       ]),
 
       scoreA: getValue(row, [
         "Score A",
+        "Team A Score",
       ]),
 
       scoreB: getValue(row, [
         "Score B",
+        "Team B Score",
       ]),
 
       teamB: getValue(row, [
         "Team B",
+        "Team 2",
       ]),
+
+      resultSummary:
+        getValue(row, [
+          "Result Summary",
+          "Match Result",
+          "Result Description",
+          "Summary",
+          "Winner",
+          "Winning Margin",
+        ]),
     }))
     .filter(
       (result) =>

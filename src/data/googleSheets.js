@@ -302,8 +302,12 @@ export async function fetchFestivalWorkbook(
       sheetName:
         "Results",
 
+      /*
+       * Column J contains the optional
+       * cricket result summary.
+       */
       range:
-        "A4:I",
+        "A4:J",
     },
 
     schools: {

@@ -33,47 +33,69 @@ const festivalTabs = [
 ];
 
 const STORAGE_KEYS = {
-  festival: "trinityPortalFestival",
-  tab: "trinityPortalTab",
-  day: "trinityPortalDay",
-  category: "trinityPortalCategory",
-  school: "trinityPortalSchool",
+  festival:
+    "trinityPortalFestival",
+
+  tab:
+    "trinityPortalTab",
+
+  day:
+    "trinityPortalDay",
+
+  category:
+    "trinityPortalCategory",
+
+  school:
+    "trinityPortalSchool",
 };
 
-function getSavedValue(key, fallbackValue) {
+function getSavedValue(
+  key,
+  fallbackValue
+) {
   try {
     return (
-      localStorage.getItem(key) || fallbackValue
+      localStorage.getItem(
+        key
+      ) || fallbackValue
     );
   } catch {
     return fallbackValue;
   }
 }
 
-function saveValue(key, value) {
+function saveValue(
+  key,
+  value
+) {
   try {
-    localStorage.setItem(key, value);
+    localStorage.setItem(
+      key,
+      value
+    );
   } catch {
-    // The portal still works when browser
-    // storage is unavailable.
+    // The portal continues working
+    // when storage is unavailable.
   }
 }
 
 function removeSavedValue(key) {
   try {
-    localStorage.removeItem(key);
+    localStorage.removeItem(
+      key
+    );
   } catch {
-    // The portal still works when browser
-    // storage is unavailable.
+    // The portal continues working
+    // when storage is unavailable.
   }
 }
 
 function clearSavedPortalPosition() {
-  Object.values(STORAGE_KEYS).forEach(
-    (key) => {
-      removeSavedValue(key);
-    }
-  );
+  Object.values(
+    STORAGE_KEYS
+  ).forEach((key) => {
+    removeSavedValue(key);
+  });
 }
 
 export default function App() {
@@ -99,21 +121,25 @@ function FestivalPortal() {
     festivalData,
   } = useFestivalData();
 
-  const [activeTab, setActiveTab] = useState(
-    () =>
-      getSavedValue(
-        STORAGE_KEYS.tab,
-        "Welcome"
-      )
+  const [
+    activeTab,
+    setActiveTab,
+  ] = useState(() =>
+    getSavedValue(
+      STORAGE_KEYS.tab,
+      "Welcome"
+    )
   );
 
-  const [selectedDay, setSelectedDay] =
-    useState(() =>
-      getSavedValue(
-        STORAGE_KEYS.day,
-        "All Dates"
-      )
-    );
+  const [
+    selectedDay,
+    setSelectedDay,
+  ] = useState(() =>
+    getSavedValue(
+      STORAGE_KEYS.day,
+      "All Dates"
+    )
+  );
 
   const [
     selectedCategory,
@@ -155,8 +181,13 @@ function FestivalPortal() {
           ""
         );
 
-      if (!savedFestivalTitle) {
-        setSessionChecked(true);
+      if (
+        !savedFestivalTitle
+      ) {
+        setSessionChecked(
+          true
+        );
+
         return;
       }
 
@@ -171,16 +202,33 @@ function FestivalPortal() {
       if (!savedFestival) {
         clearSavedPortalPosition();
 
-        setActiveTab("Welcome");
-        setSelectedDay("All Dates");
-        setSelectedCategory("All Teams");
-        setSelectedSchool("All Schools");
-        setSessionChecked(true);
+        setActiveTab(
+          "Welcome"
+        );
+
+        setSelectedDay(
+          "All Dates"
+        );
+
+        setSelectedCategory(
+          "All Teams"
+        );
+
+        setSelectedSchool(
+          "All Schools"
+        );
+
+        setSessionChecked(
+          true
+        );
 
         return;
       }
 
-      await openFestival(savedFestival);
+      await openFestival(
+        savedFestival
+      );
+
       setSessionChecked(true);
     }
 
@@ -221,7 +269,9 @@ function FestivalPortal() {
   }, [selectedSchool]);
 
   useEffect(() => {
-    if (selectedFestival?.title) {
+    if (
+      selectedFestival?.title
+    ) {
       saveValue(
         STORAGE_KEYS.festival,
         selectedFestival.title
@@ -229,124 +279,169 @@ function FestivalPortal() {
     }
   }, [selectedFestival]);
 
-  const availableDays = useMemo(() => {
-    return [
-      ...new Set(
-        festivalData.fixtures
-          .map((fixture) =>
+  const availableDays =
+    useMemo(() => {
+      return [
+        ...new Set(
+          festivalData.fixtures
+            .map((fixture) =>
+              String(
+                fixture.day || ""
+              ).trim()
+            )
+            .filter(Boolean)
+        ),
+      ];
+    }, [
+      festivalData.fixtures,
+    ]);
+
+  const availableSchools =
+    useMemo(() => {
+      const schools =
+        new Set();
+
+      festivalData.fixtures.forEach(
+        (fixture) => {
+          const teamA =
             String(
-              fixture.day || ""
-            ).trim()
-          )
-          .filter(Boolean)
-      ),
-    ];
-  }, [festivalData.fixtures]);
+              fixture.teamA ||
+                ""
+            ).trim();
 
-  const availableSchools = useMemo(() => {
-    const schools = new Set();
+          const teamB =
+            String(
+              fixture.teamB ||
+                ""
+            ).trim();
 
-    festivalData.fixtures.forEach(
-      (fixture) => {
-        const teamA = String(
-          fixture.teamA || ""
-        ).trim();
-
-        const teamB = String(
-          fixture.teamB || ""
-        ).trim();
-
-        if (teamA) {
-          schools.add(teamA);
-        }
-
-        if (teamB) {
-          schools.add(teamB);
-        }
-      }
-    );
-
-    return [...schools].sort(
-      (firstSchool, secondSchool) =>
-        firstSchool.localeCompare(
-          secondSchool,
-          "en",
-          {
-            sensitivity: "base",
+          if (teamA) {
+            schools.add(
+              teamA
+            );
           }
+
+          if (teamB) {
+            schools.add(
+              teamB
+            );
+          }
+        }
+      );
+
+      return [
+        ...schools,
+      ].sort(
+        (
+          firstSchool,
+          secondSchool
+        ) =>
+          firstSchool.localeCompare(
+            secondSchool,
+            "en",
+            {
+              sensitivity:
+                "base",
+            }
+          )
+      );
+    }, [
+      festivalData.fixtures,
+    ]);
+
+  const filteredFixtures =
+    useMemo(() => {
+      return festivalData.fixtures.filter(
+        (fixture) => {
+          const fixtureDay =
+            String(
+              fixture.day ||
+                ""
+            ).trim();
+
+          const fixtureCategory =
+            String(
+              fixture.category ||
+                ""
+            ).trim();
+
+          const teamA =
+            String(
+              fixture.teamA ||
+                ""
+            ).trim();
+
+          const teamB =
+            String(
+              fixture.teamB ||
+                ""
+            ).trim();
+
+          const matchesDay =
+            selectedDay ===
+              "All Dates" ||
+            fixtureDay ===
+              selectedDay;
+
+          const matchesCategory =
+            selectedCategory ===
+              "All Teams" ||
+            fixtureCategory ===
+              selectedCategory;
+
+          const matchesSchool =
+            selectedSchool ===
+              "All Schools" ||
+            teamA ===
+              selectedSchool ||
+            teamB ===
+              selectedSchool;
+
+          return (
+            matchesDay &&
+            matchesCategory &&
+            matchesSchool
+          );
+        }
+      );
+    }, [
+      festivalData.fixtures,
+      selectedDay,
+      selectedCategory,
+      selectedSchool,
+    ]);
+
+  const isCricketFestival =
+    useMemo(() => {
+      const sport =
+        String(
+          selectedFestival
+            ?.sportName ||
+            selectedFestival
+              ?.sport ||
+            ""
         )
-    );
-  }, [festivalData.fixtures]);
+          .trim()
+          .toLowerCase();
 
-  const filteredFixtures = useMemo(() => {
-    return festivalData.fixtures.filter(
-      (fixture) => {
-        const fixtureDay = String(
-          fixture.day || ""
-        ).trim();
+      const title =
+        String(
+          selectedFestival
+            ?.title ||
+            ""
+        )
+          .trim()
+          .toLowerCase();
 
-        const fixtureCategory = String(
-          fixture.category || ""
-        ).trim();
-
-        const teamA = String(
-          fixture.teamA || ""
-        ).trim();
-
-        const teamB = String(
-          fixture.teamB || ""
-        ).trim();
-
-        const matchesDay =
-          selectedDay === "All Dates" ||
-          fixtureDay === selectedDay;
-
-        const matchesCategory =
-          selectedCategory ===
-            "All Teams" ||
-          fixtureCategory ===
-            selectedCategory;
-
-        const matchesSchool =
-          selectedSchool ===
-            "All Schools" ||
-          teamA === selectedSchool ||
-          teamB === selectedSchool;
-
-        return (
-          matchesDay &&
-          matchesCategory &&
-          matchesSchool
-        );
-      }
-    );
-  }, [
-    festivalData.fixtures,
-    selectedDay,
-    selectedCategory,
-    selectedSchool,
-  ]);
-
-  const isCricketFestival = useMemo(() => {
-    const sportName = String(
-      selectedFestival?.sportName ||
-        selectedFestival?.sport ||
-        ""
-    )
-      .trim()
-      .toLowerCase();
-
-    const festivalTitle = String(
-      selectedFestival?.title || ""
-    )
-      .trim()
-      .toLowerCase();
-
-    return (
-      sportName.includes("cricket") ||
-      festivalTitle.includes("cricket")
-    );
-  }, [selectedFestival]);
+      return (
+        sport.includes(
+          "cricket"
+        ) ||
+        title.includes(
+          "cricket"
+        )
+      );
+    }, [selectedFestival]);
 
   async function handleFestivalOpen(
     festival
@@ -355,10 +450,21 @@ function FestivalPortal() {
       return;
     }
 
-    setActiveTab("Welcome");
-    setSelectedDay("All Dates");
-    setSelectedCategory("All Teams");
-    setSelectedSchool("All Schools");
+    setActiveTab(
+      "Welcome"
+    );
+
+    setSelectedDay(
+      "All Dates"
+    );
+
+    setSelectedCategory(
+      "All Teams"
+    );
+
+    setSelectedSchool(
+      "All Schools"
+    );
 
     saveValue(
       STORAGE_KEYS.festival,
@@ -385,17 +491,31 @@ function FestivalPortal() {
       "All Schools"
     );
 
-    await openFestival(festival);
+    await openFestival(
+      festival
+    );
   }
 
   function handleBackHome() {
     closeFestival();
+
     clearSavedPortalPosition();
 
-    setActiveTab("Welcome");
-    setSelectedDay("All Dates");
-    setSelectedCategory("All Teams");
-    setSelectedSchool("All Schools");
+    setActiveTab(
+      "Welcome"
+    );
+
+    setSelectedDay(
+      "All Dates"
+    );
+
+    setSelectedCategory(
+      "All Teams"
+    );
+
+    setSelectedSchool(
+      "All Schools"
+    );
   }
 
   if (
@@ -416,9 +536,15 @@ function FestivalPortal() {
   if (!selectedFestival) {
     return (
       <Homepage
-        festivals={festivals}
-        loading={masterLoading}
-        error={masterError}
+        festivals={
+          festivals
+        }
+        loading={
+          masterLoading
+        }
+        error={
+          masterError
+        }
         onFestivalOpen={
           handleFestivalOpen
         }
@@ -432,13 +558,21 @@ function FestivalPortal() {
         selectedFestival={
           selectedFestival
         }
-        onBackHome={handleBackHome}
+        onBackHome={
+          handleBackHome
+        }
       />
 
       <FestivalTabs
-        tabs={festivalTabs}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        tabs={
+          festivalTabs
+        }
+        activeTab={
+          activeTab
+        }
+        setActiveTab={
+          setActiveTab
+        }
       />
 
       <main className="mx-auto max-w-6xl px-5 py-8">
@@ -449,14 +583,17 @@ function FestivalPortal() {
         {!festivalLoading &&
           festivalError && (
             <StatusCard
-              text={festivalError}
+              text={
+                festivalError
+              }
               error
             />
           )}
 
         {!festivalLoading &&
           !festivalError &&
-          activeTab === "Welcome" && (
+          activeTab ===
+            "Welcome" && (
             <WelcomeTab
               selectedFestival={
                 selectedFestival
@@ -469,9 +606,12 @@ function FestivalPortal() {
 
         {!festivalLoading &&
           !festivalError &&
-          activeTab === "Fixtures" && (
+          activeTab ===
+            "Fixtures" && (
             <FixturesTab
-              selectedDay={selectedDay}
+              selectedDay={
+                selectedDay
+              }
               setSelectedDay={
                 setSelectedDay
               }
@@ -504,17 +644,22 @@ function FestivalPortal() {
 
         {!festivalLoading &&
           !festivalError &&
-          activeTab === "Results" && (
+          activeTab ===
+            "Results" && (
             <ResultsTab
               results={
                 festivalData.results
+              }
+              isCricketFestival={
+                isCricketFestival
               }
             />
           )}
 
         {!festivalLoading &&
           !festivalError &&
-          activeTab === "Schools" && (
+          activeTab ===
+            "Schools" && (
             <TeamsTab
               teams={
                 festivalData.schools
@@ -524,15 +669,19 @@ function FestivalPortal() {
 
         {!festivalLoading &&
           !festivalError &&
-          activeTab === "Map" && (
+          activeTab ===
+            "Map" && (
             <MapsTab
-              maps={festivalData.maps}
+              maps={
+                festivalData.maps
+              }
             />
           )}
 
         {!festivalLoading &&
           !festivalError &&
-          activeTab === "Vendors" && (
+          activeTab ===
+            "Vendors" && (
             <VendorsTab
               vendors={
                 festivalData.vendors
@@ -546,7 +695,8 @@ function FestivalPortal() {
             "Health & Safety" && (
             <HealthSafetyTab
               healthSafety={
-                festivalData.healthSafety ||
+                festivalData
+                  .healthSafety ||
                 []
               }
             />
@@ -562,17 +712,21 @@ function FestivalPortal() {
             "Map",
             "Vendors",
             "Health & Safety",
-          ].includes(activeTab) && (
+          ].includes(
+            activeTab
+          ) && (
             <section className="rounded-[28px] bg-white px-8 py-10 shadow-xl">
               <h2 className="mb-5 text-center text-3xl font-black uppercase text-[#071b3a]">
                 {activeTab}
               </h2>
 
               <p className="text-center text-lg text-slate-700">
-                This section is ready to
-                use data from this
-                festival’s individual
-                Google Sheet.
+                This section is
+                ready to use data
+                from this
+                festival’s
+                individual Google
+                Sheet.
               </p>
             </section>
           )}
@@ -596,22 +750,25 @@ function Homepage({
           <StatusCard text="Loading festivals..." />
         )}
 
-        {!loading && error && (
-          <StatusCard
-            text={error}
-            error
-          />
-        )}
+        {!loading &&
+          error && (
+            <StatusCard
+              text={error}
+              error
+            />
+          )}
 
         {!loading &&
           !error &&
-          festivals.length === 0 && (
+          festivals.length ===
+            0 && (
             <StatusCard text="No festivals have been added to the Master Index yet." />
           )}
 
         {!loading &&
           !error &&
-          festivals.length > 0 && (
+          festivals.length >
+            0 && (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {festivals.map(
                 (festival) => (
