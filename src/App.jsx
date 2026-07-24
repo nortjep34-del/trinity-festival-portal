@@ -327,6 +327,27 @@ function FestivalPortal() {
     selectedSchool,
   ]);
 
+  const isCricketFestival = useMemo(() => {
+    const sportName = String(
+      selectedFestival?.sportName ||
+        selectedFestival?.sport ||
+        ""
+    )
+      .trim()
+      .toLowerCase();
+
+    const festivalTitle = String(
+      selectedFestival?.title || ""
+    )
+      .trim()
+      .toLowerCase();
+
+    return (
+      sportName.includes("cricket") ||
+      festivalTitle.includes("cricket")
+    );
+  }, [selectedFestival]);
+
   async function handleFestivalOpen(
     festival
   ) {
@@ -474,6 +495,9 @@ function FestivalPortal() {
               }
               availableSchools={
                 availableSchools
+              }
+              isCricketFestival={
+                isCricketFestival
               }
             />
           )}

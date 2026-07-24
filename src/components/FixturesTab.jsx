@@ -5,9 +5,10 @@ export default function FixturesTab({
   setSelectedCategory,
   selectedSchool,
   setSelectedSchool,
-  filteredFixtures,
+  filteredFixtures = [],
   availableDays = [],
   availableSchools = [],
+  isCricketFestival = false,
 }) {
   return (
     <section className="rounded-[22px] bg-white px-4 py-6 shadow-xl md:rounded-[28px] md:px-6 md:py-8">
@@ -48,7 +49,9 @@ export default function FixturesTab({
           <select
             value={selectedCategory}
             onChange={(event) =>
-              setSelectedCategory(event.target.value)
+              setSelectedCategory(
+                event.target.value
+              )
             }
             className="w-full rounded-xl border-2 border-[#071b3a] bg-white px-3 py-2.5 text-center text-sm font-bold text-[#071b3a] md:rounded-2xl md:px-4 md:py-3 md:text-lg"
           >
@@ -56,8 +59,13 @@ export default function FixturesTab({
               All Teams
             </option>
 
-            <option value="Boys">Boys</option>
-            <option value="Girls">Girls</option>
+            <option value="Boys">
+              Boys
+            </option>
+
+            <option value="Girls">
+              Girls
+            </option>
           </select>
         </div>
 
@@ -69,7 +77,9 @@ export default function FixturesTab({
           <select
             value={selectedSchool}
             onChange={(event) =>
-              setSelectedSchool(event.target.value)
+              setSelectedSchool(
+                event.target.value
+              )
             }
             className="w-full rounded-xl border-2 border-[#071b3a] bg-white px-3 py-2.5 text-center text-sm font-bold text-[#071b3a] md:rounded-2xl md:px-4 md:py-3 md:text-lg"
           >
@@ -77,11 +87,16 @@ export default function FixturesTab({
               All Schools
             </option>
 
-            {availableSchools.map((school) => (
-              <option key={school} value={school}>
-                {school}
-              </option>
-            ))}
+            {availableSchools.map(
+              (school) => (
+                <option
+                  key={school}
+                  value={school}
+                >
+                  {school}
+                </option>
+              )
+            )}
           </select>
         </div>
       </div>
@@ -96,6 +111,7 @@ export default function FixturesTab({
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2 md:mb-4 md:gap-3">
                 <span className="rounded-full bg-[#071b3a] px-3 py-1.5 text-[11px] font-black uppercase text-white md:px-4 md:py-2 md:text-sm">
                   {fixture.day}
+
                   {fixture.time
                     ? ` • ${fixture.time}`
                     : ""}
@@ -127,6 +143,22 @@ export default function FixturesTab({
                   Venue: {fixture.venue}
                 </p>
               )}
+
+              {isCricketFestival &&
+                fixture.cricClubsLink && (
+                  <div className="mt-4 border-t border-[#071b3a]/10 pt-4 text-center">
+                    <a
+                      href={
+                        fixture.cricClubsLink
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#071b3a] px-5 py-3 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#8a1738] md:w-auto md:text-base"
+                    >
+                      🏏 View Match on CricClubs
+                    </a>
+                  </div>
+                )}
             </article>
           )
         )}

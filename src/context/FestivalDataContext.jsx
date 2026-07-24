@@ -13,7 +13,8 @@ import {
   fetchMasterFestivals,
 } from "../data/googleSheets";
 
-const FestivalDataContext = createContext(null);
+const FestivalDataContext =
+  createContext(null);
 
 const SPORT_IMAGES = {
   hockey:
@@ -41,10 +42,15 @@ const SPORT_ACCENTS = {
 };
 
 function clean(value) {
-  return String(value ?? "").trim().toLowerCase();
+  return String(value ?? "")
+    .trim()
+    .toLowerCase();
 }
 
-function getValue(row, possibleNames) {
+function getValue(
+  row,
+  possibleNames
+) {
   for (const name of possibleNames) {
     const value = row?.[name];
 
@@ -65,20 +71,33 @@ function toBoolean(value) {
     return value;
   }
 
-  return ["true", "yes", "1", "open"].includes(clean(value));
+  return [
+    "true",
+    "yes",
+    "1",
+    "open",
+  ].includes(clean(value));
 }
 
 function parseGoogleDate(value) {
-  if (!value) return null;
+  if (!value) {
+    return null;
+  }
 
-  const text = String(value).trim();
+  const text =
+    String(value).trim();
 
   const googleDate = text.match(
     /Date\((\d+),(\d+),(\d+)\)/
   );
 
   if (googleDate) {
-    const [, year, zeroBasedMonth, day] = googleDate;
+    const [
+      ,
+      year,
+      zeroBasedMonth,
+      day,
+    ] = googleDate;
 
     return new Date(
       Number(year),
@@ -89,7 +108,9 @@ function parseGoogleDate(value) {
 
   const date = new Date(text);
 
-  if (!Number.isNaN(date.getTime())) {
+  if (
+    !Number.isNaN(date.getTime())
+  ) {
     return date;
   }
 
@@ -97,22 +118,34 @@ function parseGoogleDate(value) {
 }
 
 function formatDate(value) {
-  const date = parseGoogleDate(value);
+  const date =
+    parseGoogleDate(value);
 
   if (!date) {
-    return String(value || "").trim();
+    return String(
+      value || ""
+    ).trim();
   }
 
-  return new Intl.DateTimeFormat("en-ZA", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(date);
+  return new Intl.DateTimeFormat(
+    "en-ZA",
+    {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }
+  ).format(date);
 }
 
-function createDateRange(startDate, endDate) {
-  const start = formatDate(startDate);
-  const end = formatDate(endDate);
+function createDateRange(
+  startDate,
+  endDate
+) {
+  const start =
+    formatDate(startDate);
+
+  const end =
+    formatDate(endDate);
 
   if (!start && !end) {
     return "Dates TBC";
@@ -126,11 +159,16 @@ function createDateRange(startDate, endDate) {
 }
 
 function getSportKey(sport) {
-  return clean(sport).replaceAll(" ", "");
+  return clean(sport).replaceAll(
+    " ",
+    ""
+  );
 }
 
 function isPlaceholder(value) {
-  return clean(value).startsWith("paste ");
+  return clean(value).startsWith(
+    "paste "
+  );
 }
 
 function mapMasterFestival(row) {
@@ -140,21 +178,26 @@ function mapMasterFestival(row) {
     "Name",
   ]);
 
-  const sportName = getValue(row, ["Sport"]);
+  const sportName =
+    getValue(row, ["Sport"]);
+
   const age = getValue(row, [
     "Age Group",
     "Age",
   ]);
 
-  const spreadsheetLink = getValue(row, [
-    "Festival Spreadsheet Link",
-    "Spreadsheet Link",
-    "Google Sheet Link",
-    "Sheet Link",
-  ]);
+  const spreadsheetLink =
+    getValue(row, [
+      "Festival Spreadsheet Link",
+      "Spreadsheet Link",
+      "Google Sheet Link",
+      "Sheet Link",
+    ]);
 
   const spreadsheetId =
-    extractSpreadsheetId(spreadsheetLink);
+    extractSpreadsheetId(
+      spreadsheetLink
+    );
 
   const portalOpen = toBoolean(
     getValue(row, [
@@ -164,13 +207,15 @@ function mapMasterFestival(row) {
     ])
   );
 
-  const sportKey = getSportKey(sportName);
+  const sportKey =
+    getSportKey(sportName);
 
-  const homepageImage = getValue(row, [
-    "Homepage Image",
-    "Homepage Card Image",
-    "Image",
-  ]);
+  const homepageImage =
+    getValue(row, [
+      "Homepage Image",
+      "Homepage Card Image",
+      "Image",
+    ]);
 
   const displaySport =
     title
@@ -185,23 +230,43 @@ function mapMasterFestival(row) {
     age,
     type: "Festival",
 
-    startDate: getValue(row, ["Start Date"]),
-    endDate: getValue(row, ["End Date"]),
+    startDate:
+      getValue(row, [
+        "Start Date",
+      ]),
+
+    endDate:
+      getValue(row, [
+        "End Date",
+      ]),
 
     dateRange: createDateRange(
-      getValue(row, ["Start Date"]),
-      getValue(row, ["End Date"])
+      getValue(row, [
+        "Start Date",
+      ]),
+      getValue(row, [
+        "End Date",
+      ])
     ),
 
-    active: portalOpen && Boolean(spreadsheetId),
+    active:
+      portalOpen &&
+      Boolean(spreadsheetId),
 
     image:
-      homepageImage && !isPlaceholder(homepageImage)
+      homepageImage &&
+      !isPlaceholder(
+        homepageImage
+      )
         ? homepageImage
-        : SPORT_IMAGES[sportKey] || "",
+        : SPORT_IMAGES[
+            sportKey
+          ] || "",
 
     accent:
-      SPORT_ACCENTS[sportKey] || "#071b3a",
+      SPORT_ACCENTS[
+        sportKey
+      ] || "#071b3a",
 
     spreadsheetId,
     spreadsheetLink,
@@ -211,18 +276,51 @@ function mapMasterFestival(row) {
 function mapFixtures(rows) {
   return rows
     .map((row) => ({
-      day: getValue(row, ["Day"]),
-      date: getValue(row, ["Date"]),
-      time: getValue(row, ["Time"]),
-      venue: getValue(row, ["Venue"]),
+      day: getValue(row, [
+        "Day",
+      ]),
+
+      date: getValue(row, [
+        "Date",
+      ]),
+
+      time: getValue(row, [
+        "Time",
+      ]),
+
+      venue: getValue(row, [
+        "Venue",
+        "Field",
+        "Ground",
+      ]),
 
       category: getValue(row, [
         "Boys/Girls",
+        "Boys / Girls",
+        "Category",
         "Gender",
       ]),
 
-      teamA: getValue(row, ["Team A"]),
-      teamB: getValue(row, ["Team B"]),
+      teamA: getValue(row, [
+        "Team A",
+        "Team 1",
+      ]),
+
+      teamB: getValue(row, [
+        "Team B",
+        "Team 2",
+      ]),
+
+      cricClubsLink:
+        getValue(row, [
+          "CricClubs Link",
+          "CricClubs URL",
+          "Cricclubs Link",
+          "Cricclubs URL",
+          "Match Link",
+          "Scorecard Link",
+          "Live Score Link",
+        ]),
     }))
     .filter(
       (fixture) =>
@@ -235,20 +333,42 @@ function mapFixtures(rows) {
 function mapResults(rows) {
   return rows
     .map((row) => ({
-      day: getValue(row, ["Day"]),
-      date: getValue(row, ["Date"]),
-      time: getValue(row, ["Time"]),
-      venue: getValue(row, ["Venue"]),
+      day: getValue(row, [
+        "Day",
+      ]),
+
+      date: getValue(row, [
+        "Date",
+      ]),
+
+      time: getValue(row, [
+        "Time",
+      ]),
+
+      venue: getValue(row, [
+        "Venue",
+      ]),
 
       category: getValue(row, [
         "Boys/Girls",
         "Gender",
       ]),
 
-      teamA: getValue(row, ["Team A"]),
-      scoreA: getValue(row, ["Score A"]),
-      scoreB: getValue(row, ["Score B"]),
-      teamB: getValue(row, ["Team B"]),
+      teamA: getValue(row, [
+        "Team A",
+      ]),
+
+      scoreA: getValue(row, [
+        "Score A",
+      ]),
+
+      scoreB: getValue(row, [
+        "Score B",
+      ]),
+
+      teamB: getValue(row, [
+        "Team B",
+      ]),
     }))
     .filter(
       (result) =>
@@ -258,50 +378,66 @@ function mapResults(rows) {
     );
 }
 
-function mapSchools(teamInfoRows = [], schoolRows = []) {
+function mapSchools(
+  teamInfoRows = [],
+  schoolRows = []
+) {
   const sourceRows =
-    Array.isArray(teamInfoRows) && teamInfoRows.length > 0
+    Array.isArray(
+      teamInfoRows
+    ) &&
+    teamInfoRows.length > 0
       ? teamInfoRows
-      : Array.isArray(schoolRows)
+      : Array.isArray(
+            schoolRows
+          )
         ? schoolRows
         : [];
 
   return sourceRows
     .map((row) => {
-      const teamName = getValue(row, [
-        "School Name",
-        "Team Name",
-        "School",
-        "Team",
-      ]);
+      const teamName =
+        getValue(row, [
+          "School Name",
+          "Team Name",
+          "School",
+          "Team",
+        ]);
 
-      const category = getValue(row, [
-        "Category",
-        "Boys/Girls",
-        "Boys / Girls",
-        "Gender",
-      ]);
+      const category =
+        getValue(row, [
+          "Category",
+          "Boys/Girls",
+          "Boys / Girls",
+          "Gender",
+        ]);
 
-      const image = getValue(row, [
-        "Infographic URL",
-        "Infographic Link",
-        "Team Information Image",
-        "School Information Image",
-        "Team Information Page",
-        "School Information Page",
-        "Image URL",
-        "Image Link",
-        "Image",
-      ]);
+      const image =
+        getValue(row, [
+          "Infographic URL",
+          "Infographic Link",
+          "Team Information Image",
+          "School Information Image",
+          "Team Information Page",
+          "School Information Page",
+          "Image URL",
+          "Image Link",
+          "Image",
+        ]);
 
-      const activeValue = getValue(row, [
-        "Active",
-        "Visible",
-        "Show",
-      ]);
+      const activeValue =
+        getValue(row, [
+          "Active",
+          "Visible",
+          "Show",
+        ]);
 
       const isActive =
-        activeValue === "" ? true : toBoolean(activeValue);
+        activeValue === ""
+          ? true
+          : toBoolean(
+              activeValue
+            );
 
       return {
         teamName,
@@ -319,194 +455,273 @@ function mapSchools(teamInfoRows = [], schoolRows = []) {
 }
 
 function mapContentRows(rows) {
-  return rows.reduce((content, row) => {
-    const field = getValue(row, [
-      "Field",
-      "Setting",
-      "Title",
-    ]);
+  return rows.reduce(
+    (content, row) => {
+      const field =
+        getValue(row, [
+          "Field",
+          "Setting",
+          "Title",
+        ]);
 
-    const value = getValue(row, [
-      "Content",
-      "Value",
-      "Information",
-    ]);
+      const value =
+        getValue(row, [
+          "Content",
+          "Value",
+          "Information",
+        ]);
 
-    if (field) {
-      content[field] = value;
-    }
+      if (field) {
+        content[field] =
+          value;
+      }
 
-    return content;
-  }, {});
+      return content;
+    },
+    {}
+  );
 }
 
 function mapSettingsRows(rows) {
-  return rows.reduce((settings, row) => {
-    const setting = getValue(row, [
-      "Setting",
-      "Field",
-    ]);
+  return rows.reduce(
+    (settings, row) => {
+      const setting =
+        getValue(row, [
+          "Setting",
+          "Field",
+        ]);
 
-    const value = getValue(row, [
-      "Value",
-      "Content",
-    ]);
+      const value =
+        getValue(row, [
+          "Value",
+          "Content",
+        ]);
 
-    if (setting) {
-      settings[setting] = value;
-    }
+      if (setting) {
+        settings[setting] =
+          value;
+      }
 
-    return settings;
-  }, {});
+      return settings;
+    },
+    {}
+  );
 }
 
-export function FestivalDataProvider({ children }) {
-  const [festivals, setFestivals] = useState([]);
-  const [masterLoading, setMasterLoading] =
-    useState(true);
-  const [masterError, setMasterError] =
-    useState("");
+const EMPTY_FESTIVAL_DATA = {
+  settings: {},
+  content: {},
+  fixtures: [],
+  results: [],
+  schools: [],
+  maps: [],
+  programme: [],
+  vendors: [],
+  healthSafety: [],
+  downloads: [],
+};
 
-  const [selectedFestival, setSelectedFestival] =
-    useState(null);
+export function FestivalDataProvider({
+  children,
+}) {
+  const [
+    festivals,
+    setFestivals,
+  ] = useState([]);
 
-  const [festivalLoading, setFestivalLoading] =
-    useState(false);
-  const [festivalError, setFestivalError] =
-    useState("");
+  const [
+    masterLoading,
+    setMasterLoading,
+  ] = useState(true);
 
-  const [festivalData, setFestivalData] = useState({
-    settings: {},
-    content: {},
-    fixtures: [],
-    results: [],
-    schools: [],
-    maps: [],
-    programme: [],
-    vendors: [],
-    healthSafety: [],
-    downloads: [],
-  });
+  const [
+    masterError,
+    setMasterError,
+  ] = useState("");
 
-  const loadMasterIndex = useCallback(async () => {
-    setMasterLoading(true);
-    setMasterError("");
+  const [
+    selectedFestival,
+    setSelectedFestival,
+  ] = useState(null);
 
-    try {
-      const rows = await fetchMasterFestivals();
+  const [
+    festivalLoading,
+    setFestivalLoading,
+  ] = useState(false);
 
-      const mappedFestivals = rows
-        .map(mapMasterFestival)
-        .filter((festival) => festival.title);
+  const [
+    festivalError,
+    setFestivalError,
+  ] = useState("");
 
-      setFestivals(mappedFestivals);
-    } catch (error) {
-      console.error(
-        "Could not load the Master Index:",
-        error
-      );
+  const [
+    festivalData,
+    setFestivalData,
+  ] = useState(
+    EMPTY_FESTIVAL_DATA
+  );
 
-      setFestivals([]);
-      setMasterError(
-        "The Master Festival Index could not be loaded."
-      );
-    } finally {
-      setMasterLoading(false);
-    }
-  }, []);
+  const loadMasterIndex =
+    useCallback(async () => {
+      setMasterLoading(true);
+      setMasterError("");
+
+      try {
+        const rows =
+          await fetchMasterFestivals();
+
+        const mappedFestivals =
+          rows
+            .map(
+              mapMasterFestival
+            )
+            .filter(
+              (festival) =>
+                festival.title
+            );
+
+        setFestivals(
+          mappedFestivals
+        );
+      } catch (error) {
+        console.error(
+          "Could not load the Master Index:",
+          error
+        );
+
+        setFestivals([]);
+
+        setMasterError(
+          "The Master Festival Index could not be loaded."
+        );
+      } finally {
+        setMasterLoading(
+          false
+        );
+      }
+    }, []);
 
   useEffect(() => {
     loadMasterIndex();
   }, [loadMasterIndex]);
 
-  const openFestival = useCallback(
-    async (festival) => {
-      if (
-        !festival?.active ||
-        !festival?.spreadsheetId
-      ) {
-        return;
-      }
+  const openFestival =
+    useCallback(
+      async (festival) => {
+        if (
+          !festival?.active ||
+          !festival?.spreadsheetId
+        ) {
+          return;
+        }
 
-      setSelectedFestival(festival);
-      setFestivalLoading(true);
-      setFestivalError("");
+        setSelectedFestival(
+          festival
+        );
 
-      try {
-        const workbook =
-          await fetchFestivalWorkbook(
-            festival.spreadsheetId
+        setFestivalLoading(
+          true
+        );
+
+        setFestivalError("");
+
+        try {
+          const workbook =
+            await fetchFestivalWorkbook(
+              festival.spreadsheetId
+            );
+
+          setFestivalData({
+            settings:
+              mapSettingsRows(
+                workbook.settings ||
+                  []
+              ),
+
+            content:
+              mapContentRows(
+                workbook.festivalContent ||
+                  []
+              ),
+
+            fixtures:
+              mapFixtures(
+                workbook.fixtures ||
+                  []
+              ),
+
+            results:
+              mapResults(
+                workbook.results ||
+                  []
+              ),
+
+            schools:
+              mapSchools(
+                workbook.teamInfo ||
+                  [],
+                workbook.schools ||
+                  []
+              ),
+
+            maps:
+              workbook.maps ||
+              [],
+
+            programme:
+              workbook.programme ||
+              [],
+
+            vendors:
+              workbook.vendors ||
+              [],
+
+            healthSafety:
+              workbook.healthSafety ||
+              [],
+
+            downloads:
+              workbook.downloads ||
+              [],
+          });
+        } catch (error) {
+          console.error(
+            "Could not load the festival workbook:",
+            error
           );
 
-        setFestivalData({
-          settings: mapSettingsRows(
-            workbook.settings
-          ),
+          setFestivalError(
+            "This festival’s information could not be loaded."
+          );
+        } finally {
+          setFestivalLoading(
+            false
+          );
+        }
+      },
+      []
+    );
 
-          content: mapContentRows(
-            workbook.festivalContent
-          ),
+  const closeFestival =
+    useCallback(() => {
+      setSelectedFestival(
+        null
+      );
 
-          fixtures: mapFixtures(
-            workbook.fixtures
-          ),
+      setFestivalError("");
 
-          results: mapResults(
-            workbook.results
-          ),
-
-          schools: mapSchools(
-            workbook.teamInfo,
-            workbook.schools
-          ),
-
-          maps: workbook.maps,
-          programme: workbook.programme,
-          vendors: workbook.vendors,
-          healthSafety:
-            workbook.healthSafety,
-          downloads: workbook.downloads,
-        });
-      } catch (error) {
-        console.error(
-          "Could not load the festival workbook:",
-          error
-        );
-
-        setFestivalError(
-          "This festival’s information could not be loaded."
-        );
-      } finally {
-        setFestivalLoading(false);
-      }
-    },
-    []
-  );
-
-  const closeFestival = useCallback(() => {
-    setSelectedFestival(null);
-    setFestivalError("");
-
-    setFestivalData({
-      settings: {},
-      content: {},
-      fixtures: [],
-      results: [],
-      schools: [],
-      maps: [],
-      programme: [],
-      vendors: [],
-      healthSafety: [],
-      downloads: [],
-    });
-  }, []);
+      setFestivalData({
+        ...EMPTY_FESTIVAL_DATA,
+      });
+    }, []);
 
   const value = useMemo(
     () => ({
       festivals,
       masterLoading,
       masterError,
-      reloadMasterIndex: loadMasterIndex,
+      reloadMasterIndex:
+        loadMasterIndex,
 
       selectedFestival,
       openFestival,
@@ -531,14 +746,18 @@ export function FestivalDataProvider({ children }) {
   );
 
   return (
-    <FestivalDataContext.Provider value={value}>
+    <FestivalDataContext.Provider
+      value={value}
+    >
       {children}
     </FestivalDataContext.Provider>
   );
 }
 
 export function useFestivalData() {
-  const context = useContext(FestivalDataContext);
+  const context = useContext(
+    FestivalDataContext
+  );
 
   if (!context) {
     throw new Error(

@@ -257,8 +257,12 @@ export function fetchMasterFestivals() {
   return fetchSheet({
     spreadsheetId:
       MASTER_SPREADSHEET_ID,
-    sheetName: "Festivals",
-    range: "A4:H",
+
+    sheetName:
+      "Festivals",
+
+    range:
+      "A4:H",
   });
 }
 
@@ -267,91 +271,125 @@ export async function fetchFestivalWorkbook(
 ) {
   const sheetRequests = {
     settings: {
-      sheetName: "Settings",
-      range: "A4:B",
+      sheetName:
+        "Settings",
+
+      range:
+        "A4:B",
     },
 
     festivalContent: {
-      sheetName: "FestivalContent",
-      range: "A4:B",
+      sheetName:
+        "FestivalContent",
+
+      range:
+        "A4:B",
     },
 
     fixtures: {
-      sheetName: "Fixtures",
-      range: "A4:G",
+      sheetName:
+        "Fixtures",
+
+      /*
+       * Column H contains the optional
+       * CricClubs match link.
+       */
+      range:
+        "A4:H",
     },
 
     results: {
-      sheetName: "Results",
-      range: "A4:I",
+      sheetName:
+        "Results",
+
+      range:
+        "A4:I",
     },
 
     schools: {
-      sheetName: "Schools",
-      range: "A4:B",
+      sheetName:
+        "Schools",
+
+      range:
+        "A4:B",
     },
 
     teamInfo: {
-      sheetName: "TeamInfo",
+      sheetName:
+        "TeamInfo",
 
-      /*
-       * Your TeamInfo information extends
-       * through column G:
-       *
-       * A/B = Display Order
-       * C = School Name
-       * D = Category
-       * E = Infographic URL
-       * F = Alt Text
-       * G = Active
-       */
-      range: "A4:G",
+      range:
+        "A4:G",
     },
 
     maps: {
-      sheetName: "Maps",
-      range: "A4:C",
+      sheetName:
+        "Maps",
+
+      range:
+        "A4:C",
     },
 
     programme: {
-      sheetName: "Programme",
-      range: "A4:C",
+      sheetName:
+        "Programme",
+
+      range:
+        "A4:C",
     },
 
     vendors: {
-      sheetName: "Vendors",
-      range: "A4:D",
+      sheetName:
+        "Vendors",
+
+      range:
+        "A4:D",
     },
 
     healthSafety: {
-      sheetName: "HealthSafety",
-      range: "A4:C",
+      sheetName:
+        "HealthSafety",
+
+      range:
+        "A4:C",
     },
 
     downloads: {
-      sheetName: "Downloads",
-      range: "A4:D",
+      sheetName:
+        "Downloads",
+
+      range:
+        "A4:D",
     },
   };
 
   const entries =
-    Object.entries(sheetRequests);
+    Object.entries(
+      sheetRequests
+    );
 
   const responses =
     await Promise.allSettled(
-      entries.map(([, request]) =>
-        fetchSheet({
-          spreadsheetId,
-          sheetName:
-            request.sheetName,
-          range:
-            request.range,
-        })
+      entries.map(
+        ([, request]) =>
+          fetchSheet({
+            spreadsheetId,
+
+            sheetName:
+              request.sheetName,
+
+            range:
+              request.range,
+          })
       )
     );
 
   return entries.reduce(
-    (workbook, [key], index) => {
+    (
+      workbook,
+      [key],
+      index
+    ) => {
       const response =
         responses[index];
 
@@ -359,7 +397,9 @@ export async function fetchFestivalWorkbook(
         response.status ===
         "fulfilled"
       ) {
-        if (key === "teamInfo") {
+        if (
+          key === "teamInfo"
+        ) {
           workbook[key] =
             normalizeTeamInfoRows(
               response.value
